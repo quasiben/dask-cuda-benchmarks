@@ -109,4 +109,4 @@ sleep 2
 # Upload results
 srun -N 1 -n 1 \
    python \
-   "/home/bzaitlen/GitRepos/dask-cuda-benchmarkspublish_benchmark.py"
+   "/home/bzaitlen/GitRepos/dask-cuda-benchmarks/publish_benchmark.py"

@@ -8,15 +8,16 @@ source /gpfs/fs1/bzaitlen/miniconda3/bin/activate
 ENV=`date +"%Y%m%d-nightly-0.17"`
 
 mamba create -n $ENV -c rapidsai-nightly -c nvidia -c conda-forge \
-    automake make libtool pkg-config cudatoolkit=10.2 \
+    automake make libtool pkg-config cudatoolkit=10.2 xarray \
     libhwloc psutil python=3.8 setuptools cython matplotlib seaborn \
-    cudf=0.17 dask-cudf ipython ipdb pygithub --yes --quiet
+    cudf=0.17 dask-cudf ipython ipdb pygithub gprof2dot --yes --quiet
+
+conda activate $ENV
 
 # use dask/distibuted latest
 python -m pip install git+https://github.com/dask/dask.git
 python -m pip install git+https://github.com/dask/distributed.git
 
-conda activate $ENV
 cd /home/bzaitlen/GitRepos/dask-cuda
 python -m pip install .
 cd -
