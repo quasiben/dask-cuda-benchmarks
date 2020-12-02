@@ -15,8 +15,8 @@ mamba create -n $ENV -c rapidsai-nightly -c nvidia -c conda-forge \
 conda activate $ENV
 
 # use dask/distibuted latest
-python -m pip install git+https://github.com/dask/dask.git
-python -m pip install git+https://github.com/dask/distributed.git
+python -m pip install git+https://github.com/dask/dask.git@master
+python -m pip install git+https://github.com/dask/distributed.git@master
 
 cd /home/bzaitlen/GitRepos/dask-cuda
 python -m pip install .
