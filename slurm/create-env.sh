@@ -15,8 +15,15 @@ mamba create -n $ENV -c rapidsai-nightly -c nvidia -c conda-forge \
 conda activate $ENV
 
 # use dask/distibuted latest
-python -m pip install git+https://github.com/dask/dask.git@master
-python -m pip install git+https://github.com/dask/distributed.git@master
+git clone https://github.com/dask/dask.git /tmp/dask
+git clone https://github.com/dask/distributed.git /tmp/distributed
+cd /tmp/dask && python -m pip install .
+cd /tmp/distributed
+echo "Cythonize Distributed"
+cythonize -f -i -3 --directive="profile=True" \
+    "distributed/scheduler.py" 
+
+python -m pip install .
 
 cd /home/bzaitlen/GitRepos/dask-cuda
 python -m pip install .
