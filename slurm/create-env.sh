@@ -17,13 +17,10 @@ conda activate $ENV
 # use dask/distibuted latest
 git clone https://github.com/dask/dask.git /tmp/dask
 git clone https://github.com/dask/distributed.git /tmp/distributed
-cd /tmp/dask && python -m pip install .
-cd /tmp/distributed
+cd /tmp/dask && git log -n1 && python -m pip install .
+cd /tmp/distributed && git log -n1
 echo "Cythonize Distributed"
-cythonize -f -i -3 --directive="profile=True" \
-    "distributed/scheduler.py" 
-
-python -m pip install .
+python -m pip install -vv --no-deps --install-option="--with-cython=profile" .
 
 cd /home/bzaitlen/GitRepos/dask-cuda
 python -m pip install .
@@ -60,4 +57,3 @@ cd -
 git clone https://github.com/rapidsai/ucx-py.git /tmp/ucx-py
 cd /tmp/ucx-py
 python -m pip install .
-
