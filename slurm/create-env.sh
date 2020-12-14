@@ -17,8 +17,8 @@ conda activate $ENV
 # use dask/distibuted latest
 git clone https://github.com/dask/dask.git /tmp/dask
 git clone https://github.com/dask/distributed.git /tmp/distributed
-cd /tmp/dask && python -m pip install .
-cd /tmp/distributed
+cd /tmp/dask && git log -n1 && python -m pip install .
+cd /tmp/distributed && git log -n1
 echo "Cythonize Distributed"
 python -m pip install -vv --no-deps --install-option="--with-cython=profile" .
 
@@ -57,4 +57,3 @@ cd -
 git clone https://github.com/rapidsai/ucx-py.git /tmp/ucx-py
 cd /tmp/ucx-py
 python -m pip install .
-
