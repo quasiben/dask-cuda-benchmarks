@@ -13,7 +13,7 @@ if test -f ~/.profile; then
 fi
 source $CONDA_ROOT/etc/profile.d/conda.sh
 TODAY=`date +"%Y%m%d"`
-ENV="$TODAY-nightly-0.17"
+ENV="$TODAY-nightly-0.18"
 
 srun -N1 create-env.sh
 # Environment variables to enable GPUs, InfiniBand, NVLink
