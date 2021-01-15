@@ -10,7 +10,7 @@ ENV=`date +"%Y%m%d-nightly-0.18"`
 mamba create -n $ENV -c rapidsai-nightly -c nvidia -c conda-forge \
     automake make libtool pkg-config cudatoolkit=10.2 xarray \
     libhwloc psutil python=3.8 setuptools pip cython matplotlib seaborn \
-    cudf=0.18 dask-cudf ipython ipdb pygithub gprof2dot --yes --quiet
+    cudf=0.18 dask-cudf dask-cuda ipython ipdb pygithub gprof2dot --yes --quiet
 
 conda activate $ENV
 
@@ -22,17 +22,14 @@ cd /tmp/distributed && git log -n1
 echo "Cythonize Distributed"
 python -m pip install -vv --no-deps --install-option="--with-cython=profile" .
 
-cd /home/bzaitlen/GitRepos/dask-cuda
-python -m pip install .
-cd -
 git clone https://github.com/openucx/ucx /tmp/ucx
 cd /tmp/ucx
 git checkout v1.8.x
 git clean -fdx
 # apply UCX IB registration cache patches, improves overall
 # CUDA IB performance when using a memory pool
-curl -LO https://raw.githubusercontent.com/rapidsai/ucx-split-feedstock/master/recipe/add-page-alignment.patch
-curl -LO https://raw.githubusercontent.com/rapidsai/ucx-split-feedstock/master/recipe/ib_registration_cache.patch
+curl -LO https://raw.githubusercontent.com/rapidsai/ucx-split-feedstock/bd0377fb7363fd0ddbc3d506ae3414ef6f2e2f50/recipe/add-page-alignment.patch
+curl -LO https://raw.githubusercontent.com/rapidsai/ucx-split-feedstock/bd0377fb7363fd0ddbc3d506ae3414ef6f2e2f50/recipe/ib_registration_cache.patch
 git apply ib_registration_cache.patch && git apply add-page-alignment.patch
 ./autogen.sh
 mkdir -p build
