@@ -8,7 +8,7 @@ source /gpfs/fs1/bzaitlen/miniconda3/bin/activate
 ENV=`date +"%Y%m%d-nightly-0.20"`
 
 mamba create -n $ENV -c rapidsai-nightly -c nvidia -c conda-forge \
-    automake make libtool pkg-config cudatoolkit=11.0 xarray uvloop \
+    automake make libtool pkg-config cudatoolkit=11.0 xarray uvloop viztracer\
     libhwloc psutil python=3.8 setuptools pip cython matplotlib seaborn \
     viztracer py-spy \
     cudf=0.20 dask-cudf dask-cuda ipython ipdb pygithub gprof2dot --yes --quiet
