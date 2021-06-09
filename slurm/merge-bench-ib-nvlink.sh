@@ -5,7 +5,7 @@ set -xo pipefail
 # load aliases like module
 source /etc/profile
 
-module load cuda/10.2.89.0
+module load cuda/11.0.3
 #export PATH=/gpfs/fs1/bzaitlen/miniconda3/bin:$PATH
 CONDA_ROOT=/gpfs/fs1/bzaitlen/miniconda3
 if test -f ~/.profile; then
@@ -13,7 +13,7 @@ if test -f ~/.profile; then
 fi
 source $CONDA_ROOT/etc/profile.d/conda.sh
 TODAY=`date +"%Y%m%d"`
-ENV="$TODAY-nightly-0.18"
+ENV="$TODAY-nightly-21.08"
 
 srun -N1 create-env.sh
 # Environment variables to enable GPUs, InfiniBand, NVLink
@@ -35,13 +35,13 @@ mkdir $JOB_OUTPUT_DIR
    DASK_UCX__NVLINK=True \
    DASK_UCX__INFINIBAND=True \
    DASK_RMM__POOL_SIZE=0.2GB \
+   DASK_UCX__RDMACM=True \
    DASK_DISTRIBUTED__COMM__TIMEOUTS__CONNECT="100s" \
    DASK_DISTRIBUTED__COMM__TIMEOUTS__TCP="600s" \
    DASK_DISTRIBUTED__COMM__RETRY__DELAY__MIN="1s" \
    DASK_DISTRIBUTED__COMM__RETRY__DELAY__MAX="60s" \
    DASK_DISTRIBUTED__WORKER__MEMORY__Terminate="False" \
-   UCX_NET_DEVICES=mlx5_0:1 \
-   UCX_SOCKADDR_TLS_PRIORITY=sockcm \
+   UCX_MAX_RNDV_RAILS=1 \
    srun -N 1 -n 1 \
    python -m distributed.cli.dask_scheduler \
   --protocol ucx \
@@ -62,12 +62,14 @@ for HOST in `scontrol show hostnames "$SLURM_JOB_NODELIST"`; do
   DASK_DISTRIBUTED__COMM__RETRY__DELAY__MIN="1s" \
   DASK_DISTRIBUTED__COMM__RETRY__DELAY__MAX="60s" \
   DASK_DISTRIBUTED__WORKER__MEMORY__Terminate="False" \
+  UCX_MAX_RNDV_RAILS=1 \
   srun -N 1 -w "$HOST" python -m dask_cuda.cli.dask_cuda_worker \
     --enable-tcp-over-ucx \
     --enable-nvlink \
+    --interface ib0 \
     --enable-infiniband \
-    --net-devices="auto" \
-    --rmm-pool-size 13G \
+    --enable-rdmacm \
+    --rmm-pool-size 13GB \
     --local-directory "$JOB_OUTPUT_DIR/$HOST" \
     --scheduler-file "$JOB_OUTPUT_DIR/cluster.json" &
 done
@@ -83,14 +85,18 @@ echo "Client start: $(date +%s)"
    DASK_DISTRIBUTED__COMM__RETRY__DELAY__MIN="1s" \
    DASK_DISTRIBUTED__COMM__RETRY__DELAY__MAX="60s" \
    DASK_DISTRIBUTED__WORKER__MEMORY__Terminate="False" \
-   UCX_SOCKADDR_TLS_PRIORITY=sockcm \
-   UCX_NET_DEVICES=mlx5_0:1 \
-   UCX_TLS=tcp,cuda_copy,cuda_ipc,rc,sockcm \
+   #UCX_SOCKADDR_TLS_PRIORITY=rdmacm \
+   #UCX_TLS=tcp,cuda_copy,cuda_ipc,rc,rdmacm \
+   DASK_UCX__RDMACM=True \
+   DASK_UCX__CUDA_COPY=True \
+   DASK_UCX__TCP=True \
+   DASK_UCX__NVLINK=True \
+   DASK_UCX__INFINIBAND=True \
    DASK_RMM__POOL_SIZE=0.5GB \
    UCX_LOG_LEVEL=ERROR \
-   srun -N 1 -n 1 \
+   UCX_MAX_RNDV_RAILS=1 \
    python \
-   "/home/bzaitlen/GitRepos/dask-cuda/dask_cuda/benchmarks/local_cudf_merge.py" \
+   "$CONDA_PREFIX/lib/python3.8/site-packages/dask_cuda/benchmarks/local_cudf_merge.py"  \
   --scheduler-address "$SCHED_ADDR" \
   -c 50_000_000 \
   --frac-match 1.0 \
